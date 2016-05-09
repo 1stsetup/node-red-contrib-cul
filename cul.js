@@ -7,8 +7,6 @@ var Cul = require('cul');
 
 module.exports = function (RED) {
 
-    var culjs = require('cul.js');
-
     /**
      * ====== CUL-CONTROLLER ================
      * Holds configuration for culjs,
