@@ -16,7 +16,7 @@
   ],
   "node-red": {
     "nodes": {
-      "knx": "cul.js"
+      "cul": "cul.js"
     }
   },
   "author": "Michel Verbraak <info@1st-setup.nl>",

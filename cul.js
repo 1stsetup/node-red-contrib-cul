@@ -70,7 +70,7 @@ module.exports = function (RED) {
 	    node.culConn.on('ready', function() {
 		node.log('Knx: successfully connected to cul device at ' + node.serialport + '@' + node.baudrate + ' in mode[' + node.mode + ']');
 		handler(node.culConn);
-	    };
+	    });
 
             return node.culConn;
         };
