@@ -189,8 +189,8 @@ module.exports = function (RED) {
                     }
                 });
         }
-    }
-*/
+*/    }
+
     //
     RED.nodes.registerType("cul-out", CULOut);
 
