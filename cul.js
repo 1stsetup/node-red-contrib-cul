@@ -107,12 +107,12 @@ module.exports = function (RED) {
                 node.log('culout.onInput: illegal msg.payload!');
                 return;
             }
-            this.groupAddrSend(payload.dstgad, payload.value, payload.dpt, action, function (err) {
+/*            this.groupAddrSend(payload.dstgad, payload.value, payload.dpt, action, function (err) {
                 if (err) {
                     node.error('groupAddrSend error: ' + util.inspect(err));
                 }
             });
-
+*/
         });
         this.on("close", function () {
             node.log('culout.close');
@@ -131,7 +131,7 @@ module.exports = function (RED) {
         function nodeStatusConnecting() {
             node.status({fill: "green", shape: "ring", text: "connecting"});
         }
-
+/*
         this.groupAddrSend = function (dstgad, value, dpt, action, callback) {
             dpt = dpt.toString();
             if (action !== 'write')
@@ -190,7 +190,7 @@ module.exports = function (RED) {
                 });
         }
     }
-
+*/
     //
     RED.nodes.registerType("cul-out", CULOut);
 
@@ -265,7 +265,7 @@ module.exports = function (RED) {
         /* ===== culjs events ===== */
         // initialize incoming KNX event socket (openGroupSocket)
         // there's only one connection for culjs-in:
-        culjsController && culjsController.initializeKnxConnection(function (connection) {
+/*        culjsController && culjsController.initializeKnxConnection(function (connection) {
             node.connection = connection;
             node.connection.removeListener('event', node.receiveEvent);
             node.connection.on('event', node.receiveEvent);
@@ -283,7 +283,7 @@ module.exports = function (RED) {
             node.connection.removeListener('disconnected', nodeStatusDisconnected);
             node.connection.on('disconnected', nodeStatusDisconnected);
         });
-    }
+*/    }
 
     //
     RED.nodes.registerType("cul-in", CULIn);

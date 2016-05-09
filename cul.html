@@ -36,8 +36,18 @@
     <div class="form-row">
         <label for="node-config-input-baudrate"><i class="icon-bookmark"></i> Baudrate</label>
         <select id="node-config-input-baudrate">
+            <option value="300">300</option>
+            <option value="1200">1200</option>
+            <option value="2400">2400</option>
+            <option value="4800">4800</option>
             <option value="9600">9600</option>
+            <option value="14400">14400</option>
+            <option value="19200">19200</option>
+            <option value="28800">28800</option>
             <option value="38400">38400</option>
+            <option value="57600">57600</option>
+            <option value="115200">115200</option>
+            <option value="230400">230400</option>
         </select>
     </div>
     <div class="form-row">
@@ -50,38 +60,23 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-parse"><i class="icon-bookmark"></i> Parse</label>
-        <select id="node-config-input-parse">
-            <option value="true">True</option>
-            <option value="false">False</option>
-        </select>
+        <input type="checkbox" id="node-config-input-parse">
     </div>
     <div class="form-row">
         <label for="node-config-input-init"><i class="icon-bookmark"></i> init</label>
-        <select id="node-config-input-init">
-            <option value="true">True</option>
-            <option value="false">False</option>
-        </select>
+        <input type="checkbox" id="node-config-input-init">
     </div>
     <div class="form-row">
         <label for="node-config-input-coc"><i class="icon-bookmark"></i> COC</label>
-        <select id="node-config-input-coc">
-            <option value="false">False</option>
-            <option value="true">True</option>
-        </select>
+        <input type="checkbox" id="node-config-input-coc">
     </div>
     <div class="form-row">
         <label for="node-config-input-scc"><i class="icon-bookmark"></i> SCC</label>
-        <select id="node-config-input-scc">
-            <option value="false">False</option>
-            <option value="true">True</option>
-        </select>
+        <input type="checkbox" id="node-config-input-scc">
     </div>
     <div class="form-row">
         <label for="node-config-input-rssi"><i class="icon-bookmark"></i> rssi</label>
-        <select id="node-config-input-rssi">
-            <option value="true">True</option>
-            <option value="false">False</option>
-        </select>
+        <input type="checkbox" id="node-config-input-rssi">
     </div>
 </script>
 
@@ -136,11 +131,11 @@
             serialport: {value: "/dev/ttyAMA0", required: true},
             baudrate: {value: 9600, required: true, validate: RED.validators.number()},
             mode: {value: "SlowRF", required: true},
-            parse: {value: "true", required: true},
-            init: {value: "true", required: true},
-            coc: {value: "false", required: true},
-            scc: {value: "false", required: true},
-            rssi: {value: "true", required: true},
+            parse: {value: true, required: true},
+            init: {value: true, required: true},
+            coc: {value: false, required: true},
+            scc: {value: false, required: true},
+            rssi: {value: true, required: true},
         },
         label: function () {
             return (this.name || 'cul' ) + ":" + this.serialport + "@" + this.baudrate + "@" + this.mode;
