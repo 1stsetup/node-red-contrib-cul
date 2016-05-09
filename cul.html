@@ -1,0 +1,183 @@
+<!--
+
+  CUL nodes for IBM's Node-Red
+  https://github.com/1stsetup/node-red-contrib-cul.git
+  (c) 2016, Michel Verbraak <info@1st-setup.nl>
+
+  One may find full license text here: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+  You are free to:
+
+  Share - copy and redistribute the material in any medium or format
+  Adapt - remix, transform, and build upon the material
+  The licensor cannot revoke these freedoms as long as you follow the license terms.
+
+  Under the following terms:
+
+  Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+  NonCommercial - You may not use the material for commercial purposes.
+  ShareAlike - If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
+  No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+  Notices:
+
+  You do not have to comply with the license for elements of the material in the public domain or where your use is permitted by an applicable exception or limitation.
+  No warranties are given. The license may not give you all of the permissions necessary for your intended use. For example, other rights such as publicity, privacy, or moral rights may limit how you use the material.
+-->
+<script type="text/x-red" data-template-name="cul-controller">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-serialport"><i class="icon-bookmark"></i> Serialport</label>
+        <input type="text" id="node-config-input-serialport">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-baudrate"><i class="icon-bookmark"></i> Baudrate</label>
+        <select id="node-config-input-baudrate">
+            <option value="9600">9600</option>
+            <option value="38400">38400</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-mode"><i class="icon-bookmark"></i> Mode</label>
+        <select id="node-config-input-mode">
+            <option value="SlowRF">SlowRF (FS20, HMS, FHT, EM,...)</option>
+            <option value="MORITZ">MORITZ (MAX! devices)</option>
+            <option value="AskSin">AskSin (HomeMatic devices)</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-parse"><i class="icon-bookmark"></i> Parse</label>
+        <select id="node-config-input-parse">
+            <option value="true">True</option>
+            <option value="false">False</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-init"><i class="icon-bookmark"></i> init</label>
+        <select id="node-config-input-init">
+            <option value="true">True</option>
+            <option value="false">False</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-coc"><i class="icon-bookmark"></i> COC</label>
+        <select id="node-config-input-coc">
+            <option value="false">False</option>
+            <option value="true">True</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-scc"><i class="icon-bookmark"></i> SCC</label>
+        <select id="node-config-input-scc">
+            <option value="false">False</option>
+            <option value="true">True</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-rssi"><i class="icon-bookmark"></i> rssi</label>
+        <select id="node-config-input-rssi">
+            <option value="true">True</option>
+            <option value="false">False</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-template-name="cul-out">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    	<div class="form-row">
+        <label for="node-input-controller"><i class="icon-bookmark"></i> Controller</label>
+        <input type="text" id="node-input-controller">
+    </div>
+
+
+</script>
+
+<script type="text/x-red" data-template-name="cul-in">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+   	<div class="form-row">
+        <label for="node-input-controller"><i class="icon-bookmark"></i> Controller</label>
+        <input type="text" id="node-input-controller">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="cul-out">
+    <p>Use this to <b>send</b> messages to a CUL device.<br/>
+    	<b>msg.payload</b> must be a JavaScript object or a string in JSON format
+    	<p> - dstgad: the destination <b>group</b> address (eg."1/2/3")</p>
+    	<p> - value: the actual value to send (eg."1")</p>
+    	<p> - dpt: the datapoint type (eg."1")</p>
+	for example: {"dstgad":"1/2/3", "value":"1", "dpt":"1"}
+    </p>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="cul-in">
+    <p>Use this to <b>inject</b> messages from a CUL device on the bus<br/>
+    	<b>msg.payload</b> will have the CUL message object.
+    </p>
+
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('cul-controller', {
+        category: 'config',
+        defaults: {
+            name: {value: ""},
+            serialport: {value: "/dev/ttyAMA0", required: true},
+            baudrate: {value: 9600, required: true, validate: RED.validators.number()},
+            mode: {value: "SlowRF", required: true},
+            parse: {value: "true", required: true},
+            init: {value: "true", required: true},
+            coc: {value: "false", required: true},
+            scc: {value: "false", required: true},
+            rssi: {value: "true", required: true},
+        },
+        label: function () {
+            return (this.name || 'cul' ) + ":" + this.serialport + "@" + this.baudrate + "@" + this.mode;
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('cul-out', {
+        category: 'output',
+        color: '#ffffff',
+        defaults: {
+            name: {value: ""},
+            controller: {value: "", type: "cul-controller"}
+        },
+        inputs: 1,
+        outputs: 0,
+        align: 'right',
+        label: function () {
+            return (this.groupaddr || this.name || "cul");
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('cul-in', {
+        category: 'input',
+        color: '#ffffff',
+        defaults: {
+            name: {value: ""},
+            controller: {value: "", type: "cul-controller"}
+        },
+        inputs: 0,
+        outputs: 1,
+        label: function () {
+            return (this.groupaddr || this.name || "cul");
+        }
+    });
+</script>
+

@@ -1,0 +1,32 @@
+{
+  "name": "node-red-contrib-cul",
+  "version": "0.0.1",
+  "description": "CUL for node-red",
+  "main": "cul.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1stsetup/node-red-contrib-cul.git"
+  },
+  "keywords": [
+    "node-red",
+    "cul"
+  ],
+  "node-red": {
+    "nodes": {
+      "knx": "cul.js"
+    }
+  },
+  "author": "Michel Verbraak <info@1st-setup.nl>",
+  "license": "CC-BY-NC-SA-4.0",
+  "bugs": {
+    "url": "https://github.com/1stsetup/node-red-contrib-cul/issues"
+  },
+  "homepage": "https://github.com/1stsetup/node-red-contrib-cul#readme",
+  "dependencies": {
+    "cul.js": ">=0.6.0"
+  }
+}
+
