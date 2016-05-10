@@ -16,17 +16,6 @@ module.exports = function (RED) {
     function CULControllerNode(config) {
         RED.nodes.createNode(this, config);
 
-/*
-            name: {value: ""},
-            serialport: {value: "/dev/ttyAMA0", required: true},
-            baudrate: {value: 9600, required: true},
-            mode: {value: "SlowRF", required: true},
-            parse: {value: "true", required: true},
-            init: {value: "true", required: true},
-            coc: {value: "false", required: true},
-            scc: {value: "false", required: true},
-            rssi: {value: "true", required: true},
-*/
         this.name = config.name;
         this.serialport = config.serialport;
         this.baudrate = config.baudrate;

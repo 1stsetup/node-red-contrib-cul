@@ -68,11 +68,11 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-coc"><i class="icon-bookmark"></i> COC</label>
-        <input type="checkbox" id="node-config-input-coc">
+        <input type="checkbox" id="node-config-input-coc" onchange="COCChanged(this);" >
     </div>
     <div class="form-row">
         <label for="node-config-input-scc"><i class="icon-bookmark"></i> SCC</label>
-        <input type="checkbox" id="node-config-input-scc">
+        <input type="checkbox" id="node-config-input-scc" onchange="SCCChanged(this);" >
     </div>
     <div class="form-row">
         <label for="node-config-input-rssi"><i class="icon-bookmark"></i> rssi</label>
@@ -124,6 +124,22 @@
 </script>
 
 <script type="text/javascript">
+    function COCChanged(obj) {
+	if (obj.checked) {
+		document.getElementById("node-config-input-baudrate").value = "38400";
+		document.getElementById("node-config-input-serialport").value = "/dev/ttyACM0";
+		document.getElementById("node-config-input-scc").checked = false;
+	}
+    }
+
+    function SCCChanged(obj) {
+	if (obj.checked) {
+		document.getElementById("node-config-input-baudrate").value = "38400";
+		document.getElementById("node-config-input-serialport").value = "/dev/ttyAMA0";
+		document.getElementById("node-config-input-coc").checked = false;
+	}
+    }
+
     RED.nodes.registerType('cul-controller', {
         category: 'config',
         defaults: {
