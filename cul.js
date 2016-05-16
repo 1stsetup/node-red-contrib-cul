@@ -20,50 +20,113 @@ module.exports = function (RED) {
         this.serialport = config.serialport;
         this.baudrate = config.baudrate;
         this.mode = config.mode;
-        this.parse = config.parse === "true" ? true : false;
-        this.init = config.init === "true" ? true : false;
-        this.coc = config.coc === "true" ? true : false;
-        this.scc = config.scc === "true" ? true : false;
-        this.rssi = config.rssi === "true" ? true : false;
+        this.parse = config.parse;
+        this.init = config.init;
+        this.coc = config.coc;
+        this.scc = config.scc;
+        this.rssi = config.rssi;
 
         this.culConn = null;
-        var node = this;
-        //node.log("new CULControllerNode, config: " + util.inspect(config));
 
-        /**
-         * Initialize an culjs socket, calling the handler function
-         * when successfully connected, passing it the culjs connection
-         */
-        this.initializeCULConnection = function (handler) {
-            if (node.culConn) {
-                node.log('already connected to cul device at ' + node.serialport + '@' + node.baudrate + ' in mode[' + node.mode + ']');
-                if (handler && (typeof handler === 'function'))
-                    handler(node.culConn);
-                return node.culConn;
-            }
-            node.log('connecting to to cul device at ' + node.serialport + '@' + node.baudrate + ' in mode[' + node.mode + ']');
-            node.culConn = null;
-	    node.culConn = new Cul({
-		serialport: node.serialport,
-		baudrate: node.baudrate,
-		mode: node.mode,
-		parse: node.parse,
-		init: node.init,
-		coc: node.coc,
-		scc: node.scc,
-		rssi: node.rssi
-	    });
+	this.nodeList = {};
+	this.nodeCount = 0;
 
-	    node.culConn.on('ready', function() {
-		node.log('Knx: successfully connected to cul device at ' + node.serialport + '@' + node.baudrate + ' in mode[' + node.mode + ']');
-		handler(node.culConn);
-	    });
+        var controller = this;
 
-            return node.culConn;
-        };
+	this.addNode = function (newNode) {
+		// First check if it is not yet in the list
+		if (controller.nodeList[newNode.id]) {
+			controller.log('Node "'+newNode.id+'" already connected to controller "'+controller.name+'" so will not add again.');
+		}
+		else {
+			controller.log('Adding node "'+newNode.id+'" to controller "'+controller.name+'".');
+			controller.nodeList[newNode.id] = newNode;
+
+			if (controller.nodeCount === 0) {
+				controller.connect();
+			}
+			controller.nodeCount++;
+		}
+	}
+
+	this.removeNode = function (oldNode) {
+		if (controller.nodeList[oldNode.id]) {
+			delete controller.nodeList[oldNode.id];
+			controller.nodeCount--;
+
+			if (controller.nodeCount === 0) {
+				controller.disconnect();
+			}
+		}
+		else {
+			controller.log('Node "'+oldNode.id+'" is not connected to controller "'+controller.name+'" so cannot remove.');
+		}
+	}
+
+	this.connect = function () {
+		if (controller.culConn) {
+			controller.log('Controller "'+controller.name+'" already connect not going to reconnect.');
+		}
+
+                controller.log('Connecting to cul device at ' + controller.serialport + '@' + controller.baudrate + ' in mode[' + controller.mode + ']');
+                controller.culConn = null;
+
+		for(var id in controller.nodeList) {
+			controller.nodeList[id].emit("connecting");
+		}
+
+		controller.log("serialport:" + controller.serialport);
+		controller.log("baudrate:" + controller.baudrate);
+		controller.log("mode:" + controller.mode);
+		controller.log("parse:" + controller.parse);
+		controller.log("init:" + controller.init);
+		controller.log("coc:" + controller.coc);
+		controller.log("scc:" + controller.scc);
+		controller.log("rssi:" + controller.rssi);
+
+ 	        controller.culConn = new Cul({
+	    		serialport: controller.serialport,
+	    		baudrate: controller.baudrate,
+			mode: controller.mode,
+			parse: controller.parse,
+			init: controller.init,
+			coc: controller.coc,
+			scc: controller.scc,
+			rssi: controller.rssi
+	        });
+
+		// ready event is emitted after serial connection is established and culfw acknowledged data reporting
+		controller.culConn.on('ready', function () {
+			// send arbitrary commands to culfw
+			controller.log('Controller "'+controller.name+'" ready.');
+			for(var id in controller.nodeList) {
+				controller.nodeList[id].emit("connected");
+			}
+
+			// Get version info of cul
+			controller.culConn.write('V');
+		});
+
+		controller.culConn.on('data', function (raw, message) {
+			for(var id in controller.nodeList) {
+				controller.nodeList[id].emit("data", message);
+			}
+		});
+
+	}
+
+	this.disconnect = function () {
+		controller.log('Controller "'+controller.name+'" disconnected as we have no nodes connected.');
+	}
+
         this.on("close", function () {
-            node.log('disconnecting from culjs server at cul device at ' + node.serialport + '@' + node.baudrate + ' in mode[' + node.mode + ']');
-            node.culConn && node.culConn.close && node.culConn.close();
+		controller.log('disconnecting from cul device at ' + controller.serialport + '@' + controller.baudrate + ' in mode[' + controller.mode + ']');
+		if (controller.culConn && controller.culConn.close) {
+			controller.culConn.close();
+			for(var id in controller.nodeList) {
+				controller.nodeList[id].emit("disconnected");
+			}
+		}
         });
     }
 
@@ -190,87 +253,55 @@ module.exports = function (RED) {
     function CULIn(config) {
         RED.nodes.createNode(this, config);
         this.name = config.name;
-        this.connection = null;
         var node = this;
-        //node.log('new CUL-IN, config: ' + util.inspect(config));
-        var culjsController = RED.nodes.getNode(config.controller);
+
+        this.controller = RED.nodes.getNode(config.controller);
+
         /* ===== Node-Red events ===== */
         this.on("input", function (msg) {
             if (msg != null) {
 
             }
         });
-        var node = this;
+
         this.on("close", function () {
-            if (node.receiveEvent && node.connection)
-                node.connection.removeListener('event', node.receiveEvent);
-            if (node.receiveStatus && node.connection)
-                node.connection.removeListener('status', node.receiveStatus);
+		node.controller && node.controller.removeNode && node.controller.removeNode(node);
         });
 
-        function nodeStatusConnecting() {
+	if (node.controller && node.controller.addNode) {
+		node.log("Going to add:"+config.name);
+		node.controller.addNode(node);
+	}
+
+        this.nodeStatusConnecting = function() {
             node.status({fill: "green", shape: "ring", text: "connecting"});
         }
 
-        function nodeStatusConnected() {
+        this.nodeStatusConnected = function() {
             node.status({fill: "green", shape: "dot", text: "connected"});
         }
 
-        function nodeStatusDisconnected() {
+        this.nodeStatusDisconnected = function() {
             node.status({fill: "red", shape: "dot", text: "disconnected"});
         }
 
-        node.receiveEvent = function (gad, data, datagram) {
-            node.log('knx event gad[' + gad + ']data[' + data.toString('hex') + ']');
+        this.onData = function (message) {
+            node.log('Message from CUL:' + JSON.stringify(message));
             node.send({
-                topic: 'knx:event',
-                payload: {
-                    'srcphy': datagram.source_address,
-                    'dstgad': gad,
-                    'dpt': 'no_dpt',
-                    'value': data.toString(),
-                    'type': 'event'
-                }
-            });
-        };
-        node.receiveStatus = function (gad, data, datagram) {
-            node.log('knx status gad[' + gad + ']data[' + data.toString('hex') + ']');
-            node.send({
-                topic: 'knx:status',
-                payload: {
-                    'srcphy': datagram.source_address,
-                    'dstgad': gad,
-                    'dpt': 'no_dpt',
-                    'value': data.toString(),
-                    'type': 'status'
-                }
+                topic: 'cul:message',
+                payload: message
             });
         };
 
-//		this.on("error", function(msg) {});
+	this.on("connecting", this.nodeStatusConnecting);
+	this.on("connected", this.nodeStatusConnected);
+	this.on("disconnected", this.nodeStatusDisconnected);
 
-        /* ===== culjs events ===== */
-        // initialize incoming KNX event socket (openGroupSocket)
-        // there's only one connection for culjs-in:
-/*        culjsController && culjsController.initializeKnxConnection(function (connection) {
-            node.connection = connection;
-            node.connection.removeListener('event', node.receiveEvent);
-            node.connection.on('event', node.receiveEvent);
-            node.connection.removeListener('status', node.receiveStatus);
-            node.connection.on('status', node.receiveStatus);
+	this.on("data", this.onData);
 
-            if (node.connection.connected)
-                nodeStatusConnected();
-            else
-                nodeStatusDisconnected();
-            node.connection.removeListener('connecting', nodeStatusConnecting);
-            node.connection.on('connecting', nodeStatusConnecting);
-            node.connection.removeListener('connected', nodeStatusConnected);
-            node.connection.on('connected', nodeStatusConnected);
-            node.connection.removeListener('disconnected', nodeStatusDisconnected);
-            node.connection.on('disconnected', nodeStatusDisconnected);
-        });
-*/    }
+	this.on("error", function(msg) {});
+
+    }
 
     //
     RED.nodes.registerType("cul-in", CULIn);
