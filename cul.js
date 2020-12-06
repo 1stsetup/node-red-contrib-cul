@@ -26,6 +26,7 @@ module.exports = function (RED) {
 		this.coc = config.coc;
 		this.scc = config.scc;
 		this.rssi = config.rssi;
+		this.debug = config.debug;
 
 		this.culConn = null;
 
@@ -80,6 +81,7 @@ module.exports = function (RED) {
 			controller.log("coc:" + controller.coc);
 			controller.log("scc:" + controller.scc);
 			controller.log("rssi:" + controller.rssi);
+			controller.log("debug:" + controller.debug);
 
 			controller.culConn = new Cul({
 				serialport: controller.serialport,
@@ -89,7 +91,8 @@ module.exports = function (RED) {
 				init: controller.init,
 				coc: controller.coc,
 				scc: controller.scc,
-				rssi: controller.rssi
+				rssi: controller.rssi,
+				debug: controller.debug
 			});
 
 			// ready event is emitted after serial connection is established and culfw acknowledged data reporting
