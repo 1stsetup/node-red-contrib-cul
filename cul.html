@@ -89,7 +89,12 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    	<div class="form-row">
+    <div class="form-row">
+        <label for="node-input-address"><i class="icon-tag"></i> Address</label>
+        <input type="text" id="node-input-address placeholder="Address" onchange="addressChanged(this)">
+        <span id="hexWarning"></span>
+    </div>
+   	<div class="form-row">
         <label for="node-input-controller"><i class="icon-bookmark"></i> Controller</label>
         <input type="text" id="node-input-controller">
     </div>
@@ -129,19 +134,30 @@
 
 <script type="text/javascript">
     function COCChanged(obj) {
-	if (obj.checked) {
-		document.getElementById("node-config-input-baudrate").value = "38400";
-		document.getElementById("node-config-input-serialport").value = "/dev/ttyACM0";
-		document.getElementById("node-config-input-scc").checked = false;
-	}
+        if (obj.checked) {
+            document.getElementById("node-config-input-baudrate").value = "38400";
+            document.getElementById("node-config-input-serialport").value = "/dev/ttyACM0";
+            document.getElementById("node-config-input-scc").checked = false;
+        }
     }
 
     function SCCChanged(obj) {
-	if (obj.checked) {
-		document.getElementById("node-config-input-baudrate").value = "38400";
-		document.getElementById("node-config-input-serialport").value = "/dev/ttyAMA0";
-		document.getElementById("node-config-input-coc").checked = false;
-	}
+        if (obj.checked) {
+            document.getElementById("node-config-input-baudrate").value = "38400";
+            document.getElementById("node-config-input-serialport").value = "/dev/ttyAMA0";
+            document.getElementById("node-config-input-coc").checked = false;
+        }
+    }
+
+    function addressChanged(obj) {
+        var upperCase = obj.value.match(/[A-F]/);
+        if (upperCase) {
+            obj.value = obj.value.toLowerCase();
+        }
+        var nonHex = obj.value.match(/[0-9a-f]+/);
+        if (!nonHex) {
+            document.getElementById("hexWarning").innerHTML = "Illegal characters. Only hex values [0-9a-f] allowed.";
+        }
     }
 
     RED.nodes.registerType('cul-controller', {
@@ -170,6 +186,7 @@
         color: '#ffffff',
         defaults: {
             name: {value: ""},
+            address: {value: "123456"},
             controller: {value: "", type: "cul-controller"}
         },
         inputs: 1,
