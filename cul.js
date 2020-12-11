@@ -110,6 +110,12 @@ module.exports = function (RED) {
 				Object.values(controller.nodeList).forEach(node => node.emit("data", message));
 			});
 
+			controller.culConn.on('error', function (err) {
+				if (err == "Error: Error Resource temporarily unavailable Cannot lock port") {
+					controller.log(`Cul unavailable (${err}). Will retry to open in 500ms.`)
+					setTimeout(controller.connect,500);
+				}
+			});
 		}
 
 		this.disconnect = function () {
@@ -118,9 +124,17 @@ module.exports = function (RED) {
 
 		this.on("close", function () {
 			controller.log('disconnecting from cul device at ' + controller.serialport + '@' + controller.baudrate + ' in mode[' + controller.mode + ']');
-			if (controller.culConn && controller.culConn.close) {
-				controller.culConn.close();
-				Object.values(controller.nodeList).forEach(node => node.emit("disconnected"));
+			if (controller.culConn) {
+				controller.log('Going to close ' + controller.serialport + '@' + controller.baudrate + ' in mode[' + controller.mode + ']');
+				if (controller.culConn && controller.culConn.close) {
+					controller.log('Closing ' + controller.serialport + '@' + controller.baudrate + ' in mode[' + controller.mode + ']');
+					controller.culConn.close(() => {
+						Object.values(controller.nodeList).forEach(node => node.emit("disconnected"));
+						controller.log('Closed ' + controller.serialport + '@' + controller.baudrate + ' in mode[' + controller.mode + ']');
+					});
+					
+
+				}
 			}
 		});
 	}
