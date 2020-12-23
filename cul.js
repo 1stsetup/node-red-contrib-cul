@@ -195,7 +195,15 @@ module.exports = function (RED) {
 			text: "inactive"
 		});
 
-		function nodeStatusConnected() {
+		this.nodeStatusConnecting = function () {
+			node.status({
+				fill: "green",
+				shape: "ring",
+				text: "connecting"
+			});
+		}
+
+		this.nodeStatusConnected = function () {
 			node.status({
 				fill: "green",
 				shape: "dot",
@@ -203,7 +211,7 @@ module.exports = function (RED) {
 			});
 		}
 
-		function nodeStatusDisconnected() {
+		this.nodeStatusDisconnected = function () {
 			node.status({
 				fill: "red",
 				shape: "dot",
@@ -211,13 +219,9 @@ module.exports = function (RED) {
 			});
 		}
 
-		function nodeStatusConnecting() {
-			node.status({
-				fill: "green",
-				shape: "ring",
-				text: "connecting"
-			});
-		}
+		this.on("connecting", this.nodeStatusConnecting);
+		this.on("connected", this.nodeStatusConnected);
+		this.on("disconnected", this.nodeStatusDisconnected);
 	}
 
 	//
