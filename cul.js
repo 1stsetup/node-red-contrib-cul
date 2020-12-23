@@ -140,12 +140,12 @@ module.exports = function (RED) {
 
 		this.raw = function(rawData, cb) {
 			if (controller.culConn) {
-				controller.culConn.raw(rawData, cb);
+				controller.culConn.write(rawData, cb);
 			}
 		}
 		this.cmd = function(payload, cb) {
 			if (controller.culConn) {
-				controller.culConn.cmd(payload, cb);
+				controller.culConn.cmd.apply(null, payload, cb);
 			}
 			else {
 				if (cb) {
