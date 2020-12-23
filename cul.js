@@ -137,6 +137,22 @@ module.exports = function (RED) {
 				}
 			}
 		});
+
+		this.raw = function(rawData, cb) {
+			if (controller.culConn) {
+				controller.culConn.raw(rawData, cb);
+			}
+		}
+		this.cmd = function(payload, cb) {
+			if (controller.culConn) {
+				controller.culConn.cmd(payload, cb);
+			}
+			else {
+				if (cb) {
+					cb();
+				}
+			}
+		}
 	}
 
 	RED.nodes.registerType("cul-controller", CULControllerNode);
@@ -153,26 +169,22 @@ module.exports = function (RED) {
 		this.ctrl = RED.nodes.getNode(config.controller);
 		var node = this;
 		//node.log('new CUL-OUT, config: ' + util.inspect(config));
-		this.on("input", function (msg) {
-			node.log('culout.onInput, msg[' + util.inspect(msg) + ']');
-			if (!(msg && msg.hasOwnProperty('payload'))) return;
-			var payload;
-			if (typeof (msg.payload) === "object") {
-				payload = msg.payload;
-			} else if (typeof (msg.payload) === "string") {
-				payload = JSON.parse(msg.payload);
+		this.on("input", function (msg, send, done) {
+			if (!msg) return;
+
+			if (!msg.hasOwnProperty('topic')) return;
+			if (!msg.hasOwnProperty('payload')) return;
+
+			switch (msg.topic) {
+				case "raw":
+					node.ctrl.raw(msg.payload, done);
+					break;
+				case "cmd":
+					node.ctrl.cmd(msg.payload, done);
+					break;
 			}
-			if (payload == null) {
-				node.log('culout.onInput: illegal msg.payload!');
-				return;
-			}
-			/*            this.groupAddrSend(payload.dstgad, payload.value, payload.dpt, action, function (err) {
-			                if (err) {
-			                    node.error('groupAddrSend error: ' + util.inspect(err));
-			                }
-			            });
-			*/
 		});
+
 		this.on("close", function () {
 			node.log('culout.close');
 		});
@@ -206,65 +218,6 @@ module.exports = function (RED) {
 				text: "connecting"
 			});
 		}
-		/*
-		        this.groupAddrSend = function (dstgad, value, dpt, action, callback) {
-		            dpt = dpt.toString();
-		            if (action !== 'write')
-		                throw 'Unsupported action[' + action + '] inside of groupAddrSend';
-		            node.log('groupAddrSend action[' + action + '] dstgad:' + dstgad + ', value:' + value + ', dpt:' + dpt);
-		            switch (dpt) {
-		                case '1': //Switch
-		                    value = (value.toString() === 'true' || value.toString() === '1')
-		                    break;
-		                case '9': //Floating point
-		                    value = parseFloat(value);
-		                    break;
-		                case '5':    //8-bit unsigned value               1 Byte                  EIS 6         DPT 5    0...255
-		                case '5.001':    //8-bit unsigned value               1 Byte                  DPT 5.001    DPT 5.001    0...100
-		                case '6':    //8-bit signed value                 1 Byte                  EIS 14        DPT 6    -128...127
-		                case '7':    //16-bit unsigned value              2 Byte                  EIS 10        DPT 7    0...65535
-		                case '8':    //16-bit signed value                2 Byte                  DPT 8         DPT 8    -32768...32767
-		                case '12':   //32-bit unsigned value              4 Byte                  EIS 11        DPT 12    0...4294967295
-		                case '13':   //32-bit signed value                4 Byte                  DPT 13        DPT 13    -2147483648...2147483647
-		                case '17':   //Scene                              1 Byte                  DPT 17        DPT 17    0...63
-		                case '20':   //HVAC                               1 Byte                  DPT 20        DPT 20    0..255
-		                    value = parseInt(value);
-		                    break;
-		                default:
-		                    throw 'Unsupported dpt[' + dpt + '] inside groupAddrSend of knx node'
-
-		            }
-
-		            if (!this.ctrl)
-		                node.error('Cannot proceed groupAddrSend, cause no controller-node specified!');
-		            else
-		            // init a new one-off connection from the effectively singleton KnxController
-		            // there seems to be no way to reuse the outgoing conn in adreek/node-culjs
-		                this.ctrl.initializeKnxConnection(function (connection) {
-
-		                    if (connection.connected)
-		                        nodeStatusConnected();
-		                    else
-		                        nodeStatusDisconnected();
-		                    connection.removeListener('connecting', nodeStatusConnecting);
-		                    connection.on('connecting', nodeStatusConnecting);
-		                    connection.removeListener('connected', nodeStatusConnected);
-		                    connection.on('connected', nodeStatusConnected);
-		                    connection.removeListener('disconnected', nodeStatusDisconnected);
-		                    connection.on('disconnected', nodeStatusDisconnected);
-
-		                    try {
-		                        node.log("sendAPDU: " + util.inspect(value));
-		                        connection.Action(dstgad.toString(), value, null);
-		                        callback && callback();
-		                    }
-		                    catch (err) {
-		                        node.error('error calling groupAddrSend: ' + err);
-		                        callback(err);
-		                    }
-		                });
-		        }
-		*/
 	}
 
 	//
