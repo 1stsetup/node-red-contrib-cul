@@ -166,9 +166,18 @@ module.exports = function (RED) {
 	function CULOut(config) {
 		RED.nodes.createNode(this, config);
 		this.name = config.name;
-		this.ctrl = RED.nodes.getNode(config.controller);
+		this.controller = RED.nodes.getNode(config.controller);
 		var node = this;
-		//node.log('new CUL-OUT, config: ' + util.inspect(config));
+
+		this.on("close", function () {
+			node.controller && node.controller.removeNode && node.controller.removeNode(node);
+		});
+
+		if (node.controller && node.controller.addNode) {
+			node.log("Going to add:" + config.name);
+			node.controller.addNode(node);
+		}
+
 		this.on("input", function (msg, send, done) {
 			if (!msg) return;
 
@@ -177,10 +186,10 @@ module.exports = function (RED) {
 
 			switch (msg.topic) {
 				case "raw":
-					node.ctrl.raw(msg.payload, done);
+					node.controller.raw(msg.payload, done);
 					break;
 				case "cmd":
-					node.ctrl.cmd(msg.payload, done);
+					node.controller.cmd(msg.payload, done);
 					break;
 			}
 		});
