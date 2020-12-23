@@ -115,11 +115,19 @@
 
 <script type="text/x-red" data-help-name="cul-out">
     <p>Use this to <b>send</b> messages to a CUL device.<br/>
-    	<b>msg.payload</b> must be a JavaScript object or a string in JSON format
-    	<p> - dstgad: the destination <b>group</b> address (eg."1/2/3")</p>
-    	<p> - value: the actual value to send (eg."1")</p>
-    	<p> - dpt: the datapoint type (eg."1")</p>
-	for example: {"dstgad":"1/2/3", "value":"1", "dpt":"1"}
+        <b>msg.topic</b> must be:<br>
+        <ul>
+            <li>raw: payload will contain raw command to send to cul.</li>
+            <li>cmd: payload will contain array of predefined commands.</li>
+        </ul>
+        <BR>
+        <b>Example raw for FH20:</b><br>
+        msg = { "topic":"raw", "payload":"F6C480111" }<BR>
+        <BR>
+        <b>Example cmd for FH20:</b><br>
+        msg = { "topic":"cmd", "payload":[ "FS20", "2341 2131", "1112", "on"] }<BR>
+        <BR>
+        See <a href="https://www.npmjs.com/package/cul">https://www.npmjs.com/package/cul</a> for more info.
     </p>
 
 
