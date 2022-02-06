@@ -3,7 +3,7 @@
  */
 
 var util = require('util');
-var Cul = require('cul');
+var Cul = require('@1st-setup/cul');
 
 module.exports = function (RED) {
 
