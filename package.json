@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-cul",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "CUL for node-red",
   "main": "cul.js",
   "engines": {
@@ -30,6 +30,6 @@
   },
   "homepage": "https://github.com/1stsetup/node-red-contrib-cul#readme",
   "dependencies": {
-    "@1st-setup/cul": "0.20.0"
+    "@1st-setup/cul": "0.20.1"
   }
 }
